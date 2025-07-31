@@ -1,14 +1,5 @@
 {
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "@vercel/node@3.0.7"
-    }
-  },
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "https://warehouse-inventory-narae0008.replit.app/api/$1"
-    },
     {
       "src": "/(.*)",
       "dest": "/index.html"
