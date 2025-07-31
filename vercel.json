@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
   "builds": [
     {
       "src": "client/**/*",
@@ -20,9 +19,5 @@
       "src": "/(.*)",
       "dest": "/client/$1"
     }
-  ],
-  "env": {
-    "DATABASE_URL": "@database-url",
-    "NODE_ENV": "production"
-  }
+  ]
 }
