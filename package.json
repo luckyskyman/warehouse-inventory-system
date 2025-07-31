@@ -1,4 +1,7 @@
 {
   "name": "warehouse-inventory-system",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'Build completed - static HTML deployment'"
+  }
 }
