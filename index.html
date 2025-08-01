@@ -5,353 +5,1376 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>창고 물품 재고 관리시스템</title>
   <style>
+    :root {
+      --background: hsl(0, 0%, 100%);
+      --foreground: hsl(240, 10%, 3.9%);
+      --muted: hsl(240, 4.8%, 95.9%);
+      --muted-foreground: hsl(240, 3.8%, 46.1%);
+      --popover: hsl(0, 0%, 100%);
+      --popover-foreground: hsl(240, 10%, 3.9%);
+      --card: hsl(0, 0%, 100%);
+      --card-foreground: hsl(240, 10%, 3.9%);
+      --border: hsl(240, 5.9%, 90%);
+      --input: hsl(240, 5.9%, 90%);
+      --primary: hsl(207, 90%, 54%);
+      --primary-foreground: hsl(0, 0%, 98%);
+      --secondary: hsl(240, 4.8%, 95.9%);
+      --secondary-foreground: hsl(240, 5.9%, 10%);
+      --accent: hsl(240, 4.8%, 95.9%);
+      --accent-foreground: hsl(240, 5.9%, 10%);
+      --destructive: hsl(0, 84.2%, 60.2%);
+      --destructive-foreground: hsl(0, 0%, 98%);
+      --ring: hsl(240, 5%, 64.9%);
+      --radius: 0.5rem;
+      
+      /* Warehouse specific colors */
+      --warehouse-gradient-1: hsl(240, 100%, 70%);
+      --warehouse-gradient-2: hsl(260, 60%, 65%);
+      --warehouse-card-1: hsl(168, 85%, 85%);
+      --warehouse-card-2: hsl(338, 85%, 90%);
+      --warehouse-zone: hsl(220, 16%, 96%);
+      --warehouse-zone-2: hsl(220, 20%, 87%);
+      --warehouse-success: hsl(142, 71%, 45%);
+      --warehouse-warning: hsl(48, 96%, 53%);
+      --warehouse-danger: hsl(0, 84%, 60%);
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--warehouse-gradient-1) 0%, var(--warehouse-gradient-2) 100%);
       min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--foreground);
     }
-    
-    .header {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      padding: 1rem 2rem;
+
+    /* Login Form Styles - 정확히 Replit과 동일하게 */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: center;
+      z-index: 50;
     }
-    
-    .logo {
-      color: white;
+
+    .login-card {
+      width: 100%;
+      max-width: 28rem;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-radius: 0.75rem;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+      padding: 2rem;
+    }
+
+    .login-title {
+      text-align: center;
+      margin-bottom: 1.5rem;
       font-size: 1.5rem;
       font-weight: bold;
+      color: #1f2937;
     }
-    
-    .container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 2rem;
-    }
-    
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      margin-bottom: 2rem;
-    }
-    
-    .login-form {
-      max-width: 400px;
-      margin: 4rem auto;
-    }
-    
+
     .form-group {
       margin-bottom: 1rem;
     }
-    
-    .form-group label {
+
+    .form-label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 500;
-      color: #333;
+      color: #374151;
     }
-    
-    .form-group input {
+
+    .form-input {
       width: 100%;
       padding: 0.75rem;
-      border: 1px solid #ddd;
-      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
       font-size: 1rem;
+      transition: border-color 0.2s;
     }
-    
-    .btn {
-      background: #667eea;
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn-warehouse-primary {
+      width: 100%;
+      background: linear-gradient(135deg, hsl(207, 90%, 54%) 0%, hsl(180, 100%, 50%) 100%);
       color: white;
+      font-weight: 600;
       padding: 0.75rem 1.5rem;
       border: none;
-      border-radius: 6px;
+      border-radius: 0.5rem;
       cursor: pointer;
+      transition: all 0.3s;
       font-size: 1rem;
-      width: 100%;
     }
-    
-    .btn:hover {
-      background: #5a6fd8;
+
+    .btn-warehouse-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     }
-    
+
+    .btn-warehouse-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      color: var(--destructive);
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+
+    .success-message {
+      color: var(--warehouse-success);
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Dashboard Styles */
     .dashboard {
       display: none;
+      padding: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
     }
-    
+
+    .dashboard.active {
+      display: block;
+    }
+
+    /* Header */
+    .header {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      padding: 1rem 2rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Stats Grid */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
+      gap: 1.5rem;
       margin-bottom: 2rem;
     }
-    
-    .stat-card {
-      background: white;
+
+    .warehouse-card {
+      background: linear-gradient(135deg, var(--warehouse-card-1) 0%, var(--warehouse-card-2) 100%);
+      border-radius: 0.75rem;
       padding: 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
     }
-    
+
+    .warehouse-card:hover {
+      transform: translateY(-2px);
+    }
+
     .stat-number {
       font-size: 2rem;
       font-weight: bold;
-      color: #667eea;
+      color: #1f2937;
     }
-    
+
     .stat-label {
-      color: #666;
+      color: #6b7280;
       margin-top: 0.5rem;
+      font-size: 0.875rem;
     }
-    
+
+    /* Tabs */
+    .tabs-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .tabs-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .tab-button {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      color: #6b7280;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .tab-button.active {
+      background: linear-gradient(135deg, hsl(207, 90%, 54%) 0%, hsl(180, 100%, 50%) 100%);
+      color: white;
+      border-color: transparent;
+    }
+
+    .tab-button:hover:not(.active) {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+    }
+
+    /* Content Areas */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Table Styles */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 0.5rem;
+      border: 1px solid #e5e7eb;
+    }
+
     .inventory-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 1rem;
+      background: white;
     }
-    
+
     .inventory-table th,
     .inventory-table td {
-      padding: 0.75rem;
+      padding: 1rem;
       text-align: left;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #f3f4f6;
     }
-    
+
     .inventory-table th {
-      background: #f8f9fa;
+      background: #f9fafb;
       font-weight: 600;
+      color: #374151;
     }
-    
-    .error {
-      color: #e74c3c;
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
+
+    .inventory-table tr:hover {
+      background: #f9fafb;
     }
-    
-    .success {
-      color: #27ae60;
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      white-space: nowrap;
     }
-    
-    .add-item-form {
-      display: none;
-      margin-top: 2rem;
-      background: #f8f9fa;
+
+    .badge-success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-danger {
+      background: #fecaca;
+      color: #991b1b;
+    }
+
+    .badge-info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    /* Forms */
+    .form-container {
+      background: white;
+      border-radius: 0.5rem;
       padding: 1.5rem;
-      border-radius: 8px;
+      border: 1px solid #e5e7eb;
     }
-    
+
     .form-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
       margin-bottom: 1rem;
     }
-    
-    .form-row input {
-      padding: 0.5rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+
+    .select-input {
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      background: white;
+      font-size: 0.875rem;
     }
-    
+
     .btn-small {
-      background: #667eea;
+      background: linear-gradient(135deg, hsl(207, 90%, 54%) 0%, hsl(180, 100%, 50%) 100%);
       color: white;
       padding: 0.5rem 1rem;
       border: none;
-      border-radius: 4px;
+      border-radius: 0.375rem;
       cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
       margin-right: 0.5rem;
     }
-    
+
     .btn-small:hover {
-      background: #5a6fd8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
-    
-    .btn-secondary {
-      background: #6c757d;
+
+    .btn-danger {
+      background: linear-gradient(135deg, hsl(0, 84%, 60%) 0%, hsl(348, 83%, 71%) 100%);
     }
-    
-    .btn-secondary:hover {
-      background: #5a6268;
+
+    .btn-success {
+      background: linear-gradient(135deg, hsl(142, 71%, 45%) 0%, hsl(158, 64%, 52%) 100%);
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, hsl(338, 74%, 59%) 0%, hsl(48, 96%, 53%) 100%);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .dashboard {
+        padding: 1rem;
+      }
+
+      .header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs-list {
+        flex-direction: column;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Hidden class */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Loading */
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* Search and Filters */
+    .filters-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #f9fafb;
+      border-radius: 0.5rem;
+    }
+
+    /* BOM Check Styles */
+    .bom-container {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .bom-input-section {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid #e5e7eb;
+    }
+
+    .bom-results {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid #e5e7eb;
+    }
+
+    .bom-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      margin-bottom: 0.5rem;
+      background: #fafafa;
+    }
+
+    .bom-item.insufficient {
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    .bom-item.sufficient {
+      border-color: #10b981;
+      background: #f0fdf4;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="logo">창고 물품 재고 관리시스템</div>
-    <div id="user-info" style="color: white; display: none;">
-      <span id="username-display"></span> | 
-      <button onclick="logout()" style="background: none; border: none; color: white; cursor: pointer; text-decoration: underline;">로그아웃</button>
-    </div>
-  </div>
-  <!-- 로그인 폼 -->
-  <div id="login-section">
-    <div class="login-form card">
-      <h2 style="text-align: center; margin-bottom: 2rem; color: #333;">시스템 로그인</h2>
+  <!-- 로그인 화면 -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-card">
+      <h2 class="login-title">재고관리시스템 로그인</h2>
       <form id="login-form">
         <div class="form-group">
-          <label for="username">사용자명</label>
-          <input type="text" id="username" name="username" required>
+          <label for="username" class="form-label">아이디</label>
+          <input type="text" id="username" class="form-input" required>
         </div>
         <div class="form-group">
-          <label for="password">비밀번호</label>
-          <input type="password" id="password" name="password" required>
+          <label for="password" class="form-label">비밀번호</label>
+          <input type="password" id="password" class="form-input" required>
         </div>
-        <button type="submit" class="btn">로그인</button>
-        <div id="login-error" class="error" style="display: none;"></div>
-        <div id="login-success" class="success" style="display: none;"></div>
+        <button type="submit" class="btn-warehouse-primary" id="login-btn">로그인</button>
+        <div id="login-error" class="error-message" style="display: none;"></div>
+        <div id="login-success" class="success-message" style="display: none;"></div>
       </form>
-      <div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 6px; font-size: 0.9rem;">
-        <strong>테스트 계정:</strong><br>
-        admin / password<br>
-        viewer / password
-      </div>
     </div>
   </div>
+
   <!-- 대시보드 -->
   <div id="dashboard" class="dashboard">
-    <div class="container">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number" id="total-items">0</div>
-          <div class="stat-label">총 품목</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="low-stock">0</div>
-          <div class="stat-label">부족 품목</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="total-quantity">0</div>
-          <div class="stat-label">총 수량</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="out-of-stock">0</div>
-          <div class="stat-label">품절 품목</div>
+    <!-- 헤더 -->
+    <div class="header">
+      <div class="header-title">🏭 창고 물품재고관리시스템</div>
+      <div class="user-info">
+        <span id="user-name"></span>
+        <button class="logout-btn" onclick="logout()">로그아웃</button>
+      </div>
+    </div>
+
+    <!-- 통계 그리드 -->
+    <div class="stats-grid">
+      <div class="warehouse-card">
+        <div class="stat-number" id="total-stock">0</div>
+        <div class="stat-label">총 재고량 (ea)</div>
+      </div>
+      <div class="warehouse-card">
+        <div class="stat-number" id="total-items">0</div>
+        <div class="stat-label">재고 보유 품목 수</div>
+      </div>
+      <div class="warehouse-card" onclick="showShortageItems()" style="cursor: pointer;">
+        <div class="stat-number" id="shortage-items" style="color: #ef4444;">0</div>
+        <div class="stat-label">부족 품목 (클릭하여 상세보기)</div>
+      </div>
+      <div class="warehouse-card">
+        <div class="stat-number" id="warehouse-zones">5</div>
+        <div class="stat-label">창고 구역</div>
+      </div>
+    </div>
+
+    <!-- 탭 컨테이너 -->
+    <div class="tabs-container">
+      <div class="tabs-list">
+        <button class="tab-button active" onclick="switchTab('bomCheck')">BOM 검사</button>
+        <button class="tab-button" onclick="switchTab('inventory')">재고 현황</button>
+        <button class="tab-button" onclick="switchTab('inbound')">입고 관리</button>
+        <button class="tab-button" onclick="switchTab('outbound')">출고 관리</button>
+        <button class="tab-button" onclick="switchTab('move')">이동 관리</button>
+        <button class="tab-button" onclick="switchTab('warehouse')">창고 현황</button>
+        <button class="tab-button" onclick="switchTab('layout')">레이아웃 관리</button>
+        <button class="tab-button" onclick="switchTab('excel')">엑셀 관리</button>
+        <button class="tab-button" onclick="switchTab('workDiary')">업무 일지</button>
+        <button class="tab-button" onclick="switchTab('users')" id="users-tab">사용자 관리</button>
+      </div>
+
+      <!-- BOM 검사 탭 -->
+      <div id="bomCheck-content" class="tab-content active">
+        <div class="bom-container">
+          <div class="bom-input-section">
+            <h3 style="margin-bottom: 1rem;">BOM 가이드 검사</h3>
+            <div class="form-row">
+              <div>
+                <label class="form-label">가이드 선택</label>
+                <select id="bom-guide-select" class="form-input">
+                  <option value="">가이드를 선택하세요</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">필요 수량</label>
+                <input type="number" id="bom-quantity" class="form-input" value="1" min="1">
+              </div>
+            </div>
+            <button class="btn-small" onclick="checkBom()">검사 실행</button>
+          </div>
+          
+          <div class="bom-results">
+            <h3 style="margin-bottom: 1rem;">검사 결과</h3>
+            <div id="bom-results-list">
+              <p style="color: #6b7280; text-align: center;">가이드를 선택하고 검사를 실행하세요.</p>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h3>재고 현황</h3>
-          <button class="btn-small" onclick="toggleAddForm()">품목 추가</button>
+
+      <!-- 재고 현황 탭 -->
+      <div id="inventory-content" class="tab-content">
+        <div class="filters-container">
+          <div>
+            <label class="form-label">검색</label>
+            <input type="text" id="search-input" class="form-input" placeholder="제품코드, 제품명으로 검색...">
+          </div>
+          <div>
+            <label class="form-label">카테고리</label>
+            <select id="category-filter" class="form-input">
+              <option value="all">전체</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">위치</label>
+            <select id="location-filter" class="form-input">
+              <option value="all">전체</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">재고 상태</label>
+            <select id="stock-filter" class="form-input">
+              <option value="all">전체</option>
+              <option value="inStock">재고 있음</option>
+              <option value="lowStock">부족</option>
+              <option value="outOfStock">품절</option>
+            </select>
+          </div>
         </div>
-        
-        <!-- 품목 추가 폼 -->
-        <div id="add-item-form" class="add-item-form">
-          <h4 style="margin-bottom: 1rem;">새 품목 추가</h4>
-          <div class="form-row">
-            <input type="text" id="new-code" placeholder="품목코드" required>
-            <input type="text" id="new-name" placeholder="품목명" required>
-          </div>
-          <div class="form-row">
-            <input type="text" id="new-category" placeholder="카테고리" required>
-            <input type="text" id="new-location" placeholder="위치" required>
-          </div>
-          <div class="form-row">
-            <input type="number" id="new-quantity" placeholder="현재수량" min="0" required>
-            <input type="number" id="new-min-quantity" placeholder="최소수량" min="0" required>
-          </div>
-          <button class="btn-small" onclick="addNewItem()">추가</button>
-          <button class="btn-small btn-secondary" onclick="toggleAddForm()">취소</button>
+
+        <div class="table-container">
+          <table class="inventory-table">
+            <thead>
+              <tr>
+                <th>제품코드</th>
+                <th>제품명</th>
+                <th>카테고리</th>
+                <th>현재고</th>
+                <th>최소재고</th>
+                <th>위치</th>
+                <th>상태</th>
+                <th>작업</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-tbody">
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 2rem; color: #6b7280;">
+                  재고 데이터를 불러오는 중...
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        
-        <table class="inventory-table">
-          <thead>
-            <tr>
-              <th>품목코드</th>
-              <th>품목명</th>
-              <th>카테고리</th>
-              <th>재고수량</th>
-              <th>최소수량</th>
-              <th>위치</th>
-              <th>상태</th>
-              <th>작업</th>
-            </tr>
-          </thead>
-          <tbody id="inventory-tbody">
-            <tr>
-              <td colspan="8" style="text-align: center; padding: 2rem;">로그인하여 재고 데이터를 확인하세요.</td>
-            </tr>
-          </tbody>
-        </table>
+      </div>
+
+      <!-- 입고 관리 탭 -->
+      <div id="inbound-content" class="tab-content">
+        <div class="form-container">
+          <h3 style="margin-bottom: 1rem;">입고 등록</h3>
+          <form id="inbound-form">
+            <div class="form-row">
+              <div>
+                <label class="form-label">제품코드</label>
+                <input type="text" id="inbound-code" class="form-input" required>
+              </div>
+              <div>
+                <label class="form-label">제품명</label>
+                <input type="text" id="inbound-name" class="form-input" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label class="form-label">카테고리</label>
+                <input type="text" id="inbound-category" class="form-input" required>
+              </div>
+              <div>
+                <label class="form-label">입고수량</label>
+                <input type="number" id="inbound-quantity" class="form-input" min="1" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label class="form-label">최소재고</label>
+                <input type="number" id="inbound-min-stock" class="form-input" min="0" required>
+              </div>
+              <div>
+                <label class="form-label">위치</label>
+                <input type="text" id="inbound-location" class="form-input">
+              </div>
+            </div>
+            <button type="submit" class="btn-small btn-success">입고 등록</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 출고 관리 탭 -->
+      <div id="outbound-content" class="tab-content">
+        <div class="form-container">
+          <h3 style="margin-bottom: 1rem;">출고 처리</h3>
+          <form id="outbound-form">
+            <div class="form-row">
+              <div>
+                <label class="form-label">제품 선택</label>
+                <select id="outbound-product" class="form-input" required>
+                  <option value="">제품을 선택하세요</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">출고수량</label>
+                <input type="number" id="outbound-quantity" class="form-input" min="1" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label class="form-label">출고사유</label>
+                <input type="text" id="outbound-reason" class="form-input" required>
+              </div>
+            </div>
+            <button type="submit" class="btn-small btn-warning">출고 처리</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 이동 관리 탭 -->
+      <div id="move-content" class="tab-content">
+        <div class="form-container">
+          <h3 style="margin-bottom: 1rem;">재고 이동</h3>
+          <form id="move-form">
+            <div class="form-row">
+              <div>
+                <label class="form-label">제품 선택</label>
+                <select id="move-product" class="form-input" required>
+                  <option value="">제품을 선택하세요</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">이동수량</label>
+                <input type="number" id="move-quantity" class="form-input" min="1" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label class="form-label">현재 위치</label>
+                <input type="text" id="move-from" class="form-input" readonly>
+              </div>
+              <div>
+                <label class="form-label">이동할 위치</label>
+                <input type="text" id="move-to" class="form-input" required>
+              </div>
+            </div>
+            <button type="submit" class="btn-small btn-info">이동 처리</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 창고 현황, 레이아웃 관리, 엑셀 관리, 업무일지, 사용자 관리 탭들 -->
+      <div id="warehouse-content" class="tab-content">
+        <div class="form-container">
+          <h3>창고 현황</h3>
+          <p style="color: #6b7280; margin-top: 1rem;">창고 구역별 현황을 관리할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <div id="layout-content" class="tab-content">
+        <div class="form-container">
+          <h3>레이아웃 관리</h3>
+          <p style="color: #6b7280; margin-top: 1rem;">창고 레이아웃을 설정하고 관리할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <div id="excel-content" class="tab-content">
+        <div class="form-container">
+          <h3>엑셀 관리</h3>
+          <div style="margin-top: 1rem;">
+            <button class="btn-small btn-success" onclick="exportInventory()">재고 데이터 내보내기</button>
+            <button class="btn-small" onclick="document.getElementById('excel-import').click()">엑셀 파일 가져오기</button>
+            <input type="file" id="excel-import" accept=".xlsx,.xls" style="display: none;" onchange="importExcel(event)">
+          </div>
+        </div>
+      </div>
+
+      <div id="workDiary-content" class="tab-content">
+        <div class="form-container">
+          <h3>업무 일지</h3>
+          <p style="color: #6b7280; margin-top: 1rem;">일일 업무 내용을 기록하고 관리할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <div id="users-content" class="tab-content">
+        <div class="form-container">
+          <h3>사용자 관리</h3>
+          <p style="color: #6b7280; margin-top: 1rem;">사용자 계정과 권한을 관리할 수 있습니다.</p>
+        </div>
       </div>
     </div>
   </div>
+
   <script>
-    // 로컬 스토리지를 사용한 완전한 클라이언트 사이드 시스템
+    // 전역 변수
     let currentUser = null;
-    
-    // 기본 계정 정보
+    let inventory = [];
+    let bomGuides = [];
+    let transactions = [];
+
+    // 기본 사용자 계정
     const users = [
-      { id: 1, username: 'admin', password: 'password', role: 'admin' },
-      { id: 2, username: 'viewer', password: 'password', role: 'viewer' }
+      { id: 1, username: 'admin', password: 'password', role: 'admin', permissions: ['all'] },
+      { id: 2, username: 'manager', password: 'password', role: 'manager', permissions: ['read', 'write'] },
+      { id: 3, username: 'viewer', password: 'password', role: 'viewer', permissions: ['read'] }
     ];
-    
+
     // 기본 재고 데이터
-    let inventory = [
-      {
-        id: 1,
-        code: 'ITEM001',
-        name: '테스트 제품 1',
-        category: '전자제품',
-        quantity: 50,
-        min_quantity: 10,
-        location: 'A-1-1'
+    const defaultInventory = [
+      { id: 1, code: 'ELEC001', name: '전자부품 A', category: '전자부품', stock: 150, minStock: 50, location: 'A-1-1' },
+      { id: 2, code: 'MECH002', name: '기계부품 B', category: '기계부품', stock: 25, minStock: 30, location: 'B-2-1' },
+      { id: 3, code: 'TOOL003', name: '공구 C', category: '공구', stock: 0, minStock: 10, location: 'C-1-2' },
+      { id: 4, code: 'MAT004', name: '원자재 D', category: '원자재', stock: 200, minStock: 100, location: 'A-2-3' },
+      { id: 5, code: 'CHEM005', name: '화학물질 E', category: '화학', stock: 5, minStock: 20, location: 'D-1-1' }
+    ];
+
+    // 기본 BOM 가이드
+    const defaultBomGuides = [
+      { 
+        id: 1, 
+        name: '제품 A 조립', 
+        components: [
+          { code: 'ELEC001', name: '전자부품 A', required: 2 },
+          { code: 'MECH002', name: '기계부품 B', required: 1 },
+          { code: 'TOOL003', name: '공구 C', required: 1 }
+        ]
       },
-      {
-        id: 2,
-        code: 'ITEM002', 
-        name: '테스트 제품 2',
-        category: '부품',
-        quantity: 5,
-        min_quantity: 20,
-        location: 'B-2-1'
-      },
-      {
-        id: 3,
-        code: 'ITEM003',
-        name: '부족 재고 샘플',
-        category: '소모품',
-        quantity: 0,
-        min_quantity: 15,
-        location: 'C-3-2'
-      },
-      {
-        id: 4,
-        code: 'ITEM004',
-        name: '정상 재고 샘플',
-        category: '원자재',
-        quantity: 100,
-        min_quantity: 25,
-        location: 'D-1-3'
+      { 
+        id: 2, 
+        name: '제품 B 조립', 
+        components: [
+          { code: 'MAT004', name: '원자재 D', required: 5 },
+          { code: 'CHEM005', name: '화학물질 E', required: 2 }
+        ]
       }
     ];
-    // 로컬 스토리지에서 데이터 로드
+
+    // 데이터 로드/저장 함수
     function loadData() {
-      const savedInventory = localStorage.getItem('inventory');
-      if (savedInventory) {
-        inventory = JSON.parse(savedInventory);
-      }
+      inventory = JSON.parse(localStorage.getItem('inventory') || JSON.stringify(defaultInventory));
+      bomGuides = JSON.parse(localStorage.getItem('bomGuides') || JSON.stringify(defaultBomGuides));
+      transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
     }
-    // 로컬 스토리지에 데이터 저장
+
     function saveData() {
       localStorage.setItem('inventory', JSON.stringify(inventory));
+      localStorage.setItem('bomGuides', JSON.stringify(bomGuides));
+      localStorage.setItem('transactions', JSON.stringify(transactions));
     }
-    // 페이지 로드 시 데이터 로드
-    loadData();
+
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      updateStats();
+      initializeSelects();
+    });
+
     // 로그인 처리
     document.getElementById('login-form').addEventListener('submit', (e) => {
-      e.preventDe...
-[truncated]
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const loginBtn = document.getElementById('login-btn');
+      const errorDiv = document.getElementById('login-error');
+      const successDiv = document.getElementById('login-success');
+      
+      // 초기화
+      errorDiv.style.display = 'none';
+      successDiv.style.display = 'none';
+      loginBtn.disabled = true;
+      loginBtn.textContent = '로그인 중...';
+      
+      // 인증 확인
+      setTimeout(() => {
+        const user = users.find(u => u.username === username && u.password === password);
+        
+        if (user) {
+          currentUser = user;
+          successDiv.textContent = '로그인 성공! 시스템을 로드하는 중...';
+          successDiv.style.display = 'block';
+          
+          setTimeout(() => {
+            showDashboard();
+          }, 1000);
+        } else {
+          errorDiv.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
+          errorDiv.style.display = 'block';
+          loginBtn.disabled = false;
+          loginBtn.textContent = '로그인';
+        }
+      }, 800);
+    });
+
+    // 대시보드 표시
+    function showDashboard() {
+      document.getElementById('login-overlay').style.display = 'none';
+      document.getElementById('dashboard').classList.add('active');
+      document.getElementById('user-name').textContent = `${currentUser.username} (${currentUser.role})`;
+      
+      // 권한에 따른 탭 표시/숨김
+      if (currentUser.role !== 'admin') {
+        document.getElementById('users-tab').style.display = 'none';
+      }
+      
+      updateStats();
+      updateInventoryTable();
+      updateBomGuideSelect();
+      updateProductSelects();
+    }
+
+    // 로그아웃
+    function logout() {
+      currentUser = null;
+      document.getElementById('login-overlay').style.display = 'flex';
+      document.getElementById('dashboard').classList.remove('active');
+      document.getElementById('login-form').reset();
+      document.getElementById('login-error').style.display = 'none';
+      document.getElementById('login-success').style.display = 'none';
+      document.getElementById('login-btn').disabled = false;
+      document.getElementById('login-btn').textContent = '로그인';
+    }
+
+    // 탭 전환
+    function switchTab(tabName) {
+      // 모든 탭 버튼과 콘텐츠 비활성화
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      // 선택된 탭 활성화
+      event.target.classList.add('active');
+      document.getElementById(tabName + '-content').classList.add('active');
+    }
+
+    // 통계 업데이트
+    function updateStats() {
+      const totalStock = inventory.reduce((sum, item) => sum + Math.max(0, item.stock), 0);
+      const totalItems = inventory.filter(item => item.stock > 0).length;
+      const shortageItems = inventory.filter(item => item.stock < item.minStock).length;
+      
+      document.getElementById('total-stock').textContent = totalStock.toLocaleString();
+      document.getElementById('total-items').textContent = totalItems;
+      document.getElementById('shortage-items').textContent = shortageItems;
+    }
+
+    // 재고 테이블 업데이트
+    function updateInventoryTable() {
+      const tbody = document.getElementById('inventory-tbody');
+      const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
+      const categoryFilter = document.getElementById('category-filter')?.value || 'all';
+      const locationFilter = document.getElementById('location-filter')?.value || 'all';
+      const stockFilter = document.getElementById('stock-filter')?.value || 'all';
+      
+      let filteredInventory = inventory.filter(item => {
+        const matchesSearch = item.code.toLowerCase().includes(searchTerm) || 
+                             item.name.toLowerCase().includes(searchTerm);
+        const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
+        const matchesLocation = locationFilter === 'all' || item.location === locationFilter;
+        
+        let matchesStock = true;
+        if (stockFilter === 'inStock') matchesStock = item.stock > item.minStock;
+        else if (stockFilter === 'lowStock') matchesStock = item.stock <= item.minStock && item.stock > 0;
+        else if (stockFilter === 'outOfStock') matchesStock = item.stock === 0;
+        
+        return matchesSearch && matchesCategory && matchesLocation && matchesStock;
+      });
+
+      if (filteredInventory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #6b7280;">검색 결과가 없습니다.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filteredInventory.map(item => {
+        let statusClass, statusText;
+        if (item.stock === 0) {
+          statusClass = 'badge-danger';
+          statusText = '품절';
+        } else if (item.stock < item.minStock) {
+          statusClass = 'badge-warning';
+          statusText = '부족';
+        } else {
+          statusClass = 'badge-success';
+          statusText = '정상';
+        }
+
+        return `
+          <tr>
+            <td class="font-mono">${item.code}</td>
+            <td>${item.name}</td>
+            <td>${item.category}</td>
+            <td><strong style="color: ${item.stock < 0 ? '#ef4444' : item.stock === 0 ? '#f59e0b' : item.stock < item.minStock ? '#eab308' : '#10b981'}">${item.stock}</strong></td>
+            <td>${item.minStock}</td>
+            <td><span class="badge badge-info">${item.location || '미지정'}</span></td>
+            <td><span class="badge ${statusClass}">${statusText}</span></td>
+            <td>
+              ${currentUser.role === 'admin' ? `
+                <button class="btn-small" onclick="adjustStock(${item.id})" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">수정</button>
+                <button class="btn-small btn-danger" onclick="deleteItem(${item.id})" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">삭제</button>
+              ` : '<span style="color: #6b7280; font-size: 0.75rem;">권한 없음</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 선택박스들 초기화
+    function initializeSelects() {
+      updateCategoryFilter();
+      updateLocationFilter();
+    }
+
+    function updateCategoryFilter() {
+      const categoryFilter = document.getElementById('category-filter');
+      if (!categoryFilter) return;
+      
+      const categories = [...new Set(inventory.map(item => item.category))];
+      categoryFilter.innerHTML = '<option value="all">전체</option>' + 
+        categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+    }
+
+    function updateLocationFilter() {
+      const locationFilter = document.getElementById('location-filter');
+      if (!locationFilter) return;
+      
+      const locations = [...new Set(inventory.map(item => item.location).filter(Boolean))];
+      locationFilter.innerHTML = '<option value="all">전체</option>' + 
+        locations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+    }
+
+    function updateBomGuideSelect() {
+      const bomGuideSelect = document.getElementById('bom-guide-select');
+      if (!bomGuideSelect) return;
+      
+      bomGuideSelect.innerHTML = '<option value="">가이드를 선택하세요</option>' +
+        bomGuides.map(guide => `<option value="${guide.id}">${guide.name}</option>`).join('');
+    }
+
+    function updateProductSelects() {
+      const outboundSelect = document.getElementById('outbound-product');
+      const moveSelect = document.getElementById('move-product');
+      
+      const productOptions = inventory.filter(item => item.stock > 0).map(item => 
+        `<option value="${item.id}">${item.code} - ${item.name} (재고: ${item.stock})</option>`
+      ).join('');
+      
+      if (outboundSelect) {
+        outboundSelect.innerHTML = '<option value="">제품을 선택하세요</option>' + productOptions;
+      }
+      
+      if (moveSelect) {
+        moveSelect.innerHTML = '<option value="">제품을 선택하세요</option>' + productOptions;
+      }
+    }
+
+    // 검색 및 필터링 이벤트 리스너
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const searchInput = document.getElementById('search-input');
+        const categoryFilter = document.getElementById('category-filter');
+        const locationFilter = document.getElementById('location-filter');
+        const stockFilter = document.getElementById('stock-filter');
+        
+        if (searchInput) searchInput.addEventListener('input', updateInventoryTable);
+        if (categoryFilter) categoryFilter.addEventListener('change', updateInventoryTable);
+        if (locationFilter) locationFilter.addEventListener('change', updateInventoryTable);
+        if (stockFilter) stockFilter.addEventListener('change', updateInventoryTable);
+      }, 100);
+    });
+
+    // BOM 검사 함수
+    function checkBom() {
+      const guideId = document.getElementById('bom-guide-select').value;
+      const quantity = parseInt(document.getElementById('bom-quantity').value) || 1;
+      const resultsDiv = document.getElementById('bom-results-list');
+      
+      if (!guideId) {
+        resultsDiv.innerHTML = '<p style="color: #ef4444;">가이드를 선택해주세요.</p>';
+        return;
+      }
+      
+      const guide = bomGuides.find(g => g.id == guideId);
+      if (!guide) {
+        resultsDiv.innerHTML = '<p style="color: #ef4444;">선택된 가이드를 찾을 수 없습니다.</p>';
+        return;
+      }
+      
+      let resultsHTML = `<h4 style="margin-bottom: 1rem;">${guide.name} - 필요 수량: ${quantity}개</h4>`;
+      let allSufficient = true;
+      
+      guide.components.forEach(component => {
+        const inventoryItem = inventory.find(item => item.code === component.code);
+        const requiredQuantity = component.required * quantity;
+        const availableStock = inventoryItem ? inventoryItem.stock : 0;
+        const isSufficient = availableStock >= requiredQuantity;
+        
+        if (!isSufficient) allSufficient = false;
+        
+        resultsHTML += `
+          <div class="bom-item ${isSufficient ? 'sufficient' : 'insufficient'}">
+            <div>
+              <strong>${component.code}</strong> - ${component.name}
+              <br><small>필요: ${requiredQuantity}개, 보유: ${availableStock}개</small>
+            </div>
+            <div>
+              <span class="badge ${isSufficient ? 'badge-success' : 'badge-danger'}">
+                ${isSufficient ? '충분' : `부족 ${requiredQuantity - availableStock}개`}
+              </span>
+            </div>
+          </div>
+        `;
+      });
+      
+      resultsHTML += `
+        <div style="margin-top: 1rem; padding: 1rem; background: ${allSufficient ? '#f0fdf4' : '#fef2f2'}; border-radius: 0.5rem; text-align: center;">
+          <strong style="color: ${allSufficient ? '#166534' : '#991b1b'};">
+            ${allSufficient ? '✅ 모든 부품이 충분합니다!' : '❌ 일부 부품이 부족합니다.'}
+          </strong>
+        </div>
+      `;
+      
+      resultsDiv.innerHTML = resultsHTML;
+    }
+
+    // 입고 처리
+    document.getElementById('inbound-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const code = document.getElementById('inbound-code').value;
+      const name = document.getElementById('inbound-name').value;
+      const category = document.getElementById('inbound-category').value;
+      const quantity = parseInt(document.getElementById('inbound-quantity').value);
+      const minStock = parseInt(document.getElementById('inbound-min-stock').value);
+      const location = document.getElementById('inbound-location').value;
+      
+      // 기존 제품 확인
+      const existingItem = inventory.find(item => item.code === code);
+      
+      if (existingItem) {
+        // 기존 제품 재고 증가
+        existingItem.stock += quantity;
+        existingItem.name = name;
+        existingItem.category = category;
+        existingItem.minStock = minStock;
+        if (location) existingItem.location = location;
+      } else {
+        // 새 제품 추가
+        const newId = Math.max(...inventory.map(item => item.id)) + 1;
+        inventory.push({
+          id: newId,
+          code,
+          name,
+          category,
+          stock: quantity,
+          minStock,
+          location: location || '미지정'
+        });
+      }
+      
+      // 트랜잭션 기록
+      transactions.push({
+        id: Date.now(),
+        type: 'inbound',
+        itemCode: code,
+        itemName: name,
+        quantity,
+        date: new Date().toISOString(),
+        user: currentUser.username
+      });
+      
+      saveData();
+      updateStats();
+      updateInventoryTable();
+      updateProductSelects();
+      initializeSelects();
+      
+      alert('입고가 완료되었습니다.');
+      document.getElementById('inbound-form').reset();
+    });
+
+    // 출고 처리
+    document.getElementById('outbound-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const productId = parseInt(document.getElementById('outbound-product').value);
+      const quantity = parseInt(document.getElementById('outbound-quantity').value);
+      const reason = document.getElementById('outbound-reason').value;
+      
+      const item = inventory.find(i => i.id === productId);
+      
+      if (!item) {
+        alert('제품을 찾을 수 없습니다.');
+        return;
+      }
+      
+      if (item.stock < quantity) {
+        alert(`재고가 부족합니다. (현재 재고: ${item.stock}개)`);
+        return;
+      }
+      
+      item.stock -= quantity;
+      
+      // 트랜잭션 기록
+      transactions.push({
+        id: Date.now(),
+        type: 'outbound',
+        itemCode: item.code,
+        itemName: item.name,
+        quantity,
+        reason,
+        date: new Date().toISOString(),
+        user: currentUser.username
+      });
+      
+      saveData();
+      updateStats();
+      updateInventoryTable();
+      updateProductSelects();
+      
+      alert('출고가 완료되었습니다.');
+      document.getElementById('outbound-form').reset();
+    });
+
+    // 이동 처리
+    document.getElementById('move-product').addEventListener('change', (e) => {
+      const productId = parseInt(e.target.value);
+      const item = inventory.find(i => i.id === productId);
+      const fromInput = document.getElementById('move-from');
+      
+      if (item && fromInput) {
+        fromInput.value = item.location || '미지정';
+      }
+    });
+
+    document.getElementById('move-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const productId = parseInt(document.getElementById('move-product').value);
+      const quantity = parseInt(document.getElementById('move-quantity').value);
+      const toLocation = document.getElementById('move-to').value;
+      
+      const item = inventory.find(i => i.id === productId);
+      
+      if (!item) {
+        alert('제품을 찾을 수 없습니다.');
+        return;
+      }
+      
+      if (item.stock < quantity) {
+        alert(`재고가 부족합니다. (현재 재고: ${item.stock}개)`);
+        return;
+      }
+      
+      const fromLocation = item.location;
+      item.location = toLocation;
+      
+      // 트랜잭션 기록
+      transactions.push({
+        id: Date.now(),
+        type: 'move',
+        itemCode: item.code,
+        itemName: item.name,
+        quantity,
+        fromLocation,
+        toLocation,
+        date: new Date().toISOString(),
+        user: currentUser.username
+      });
+      
+      saveData();
+      updateInventoryTable();
+      initializeSelects();
+      
+      alert('이동이 완료되었습니다.');
+      document.getElementById('move-form').reset();
+    });
+
+    // 부족 품목 상세보기
+    function showShortageItems() {
+      const shortageItems = inventory.filter(item => item.stock < item.minStock);
+      
+      if (shortageItems.length === 0) {
+        alert('부족한 품목이 없습니다.');
+        return;
+      }
+      
+      let message = '부족 품목 현황:\n\n';
+      shortageItems.forEach(item => {
+        const shortage = item.minStock - item.stock;
+        message += `${item.code} - ${item.name}\n`;
+        message += `현재고: ${item.stock}, 최소재고: ${item.minStock}, 부족량: ${shortage}\n\n`;
+      });
+      
+      alert(message);
+    }
+
+    // 재고 수정
+    function adjustStock(itemId) {
+      if (currentUser.role !== 'admin') {
+        alert('관리자 권한이 필요합니다.');
+        return;
+      }
+      
+      const item = inventory.find(i => i.id === itemId);
+      if (!item) return;
+      
+      const newStock = prompt(`${item.name}의 새로운 재고량을 입력하세요 (현재: ${item.stock}):`, item.stock);
+      
+      if (newStock !== null && !isNaN(newStock) && newStock >= 0) {
+        const oldStock = item.stock;
+        item.stock = parseInt(newStock);
+        
+        // 트랜잭션 기록
+        transactions.push({
+          id: Date.now(),
+          type: 'adjustment',
+          itemCode: item.code,
+          itemName: item.name,
+          oldStock,
+          newStock: item.stock,
+          quantity: item.stock - oldStock,
+          date: new Date().toISOString(),
+          user: currentUser.username
+        });
+        
+        saveData();
+        updateStats();
+        updateInventoryTable();
+        updateProductSelects();
+        
+        alert('재고가 수정되었습니다.');
+      }
+    }
+
+    // 품목 삭제
+    function deleteItem(itemId) {
+      if (currentUser.role !== 'admin') {
+        alert('관리자 권한이 필요합니다.');
+        return;
+      }
+      
+      const item = inventory.find(i => i.id === itemId);
+      if (!item) return;
+      
+      if (confirm(`정말로 "${item.name}" 품목을 삭제하시겠습니까?`)) {
+        inventory = inventory.filter(i => i.id !== itemId);
+        
+        // 트랜잭션 기록
+        transactions.push({
+          id: Date.now(),
+          type: 'delete',
+          itemCode: item.code,
+          itemName: item.name,
+          date: new Date().toISOString(),
+          user: currentUser.username
+        });
+        
+        saveData();
+        updateStats();
+        updateInventoryTable();
+        updateProductSelects();
+        initializeSelects();
+        
+        alert('품목이 삭제되었습니다.');
+      }
+    }
+
+    // 엑셀 내보내기
+    function exportInventory() {
+      const csvContent = [
+        ['제품코드', '제품명', '카테고리', '현재고', '최소재고', '위치', '상태'],
+        ...inventory.map(item => [
+          item.code,
+          item.name,
+          item.category,
+          item.stock,
+          item.minStock,
+          item.location || '미지정',
+          item.stock === 0 ? '품절' : item.stock < item.minStock ? '부족' : '정상'
+        ])
+      ].map(row => row.join(',')).join('\n');
+      
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `재고현황_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      
+      alert('재고 데이터가 CSV 파일로 다운로드되었습니다.');
+    }
+
+    // 엑셀 가져오기 (기본 구현)
+    function importExcel(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      alert('엑셀 가져오기 기능은 추후 구현 예정입니다.');
+      event.target.value = '';
+    }
+  </script>
+</body>
+</html>
