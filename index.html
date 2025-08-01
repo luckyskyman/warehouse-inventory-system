@@ -193,11 +193,10 @@
   <div class="header">
     <div class="logo">창고 물품 재고 관리시스템</div>
     <div id="user-info" style="color: white; display: none;">
-      <span id="username"></span> | 
+      <span id="username-display"></span> | 
       <button onclick="logout()" style="background: none; border: none; color: white; cursor: pointer; text-decoration: underline;">로그아웃</button>
     </div>
   </div>
-
   <!-- 로그인 폼 -->
   <div id="login-section">
     <div class="login-form card">
@@ -222,7 +221,6 @@
       </div>
     </div>
   </div>
-
   <!-- 대시보드 -->
   <div id="dashboard" class="dashboard">
     <div class="container">
@@ -244,7 +242,6 @@
           <div class="stat-label">품절 품목</div>
         </div>
       </div>
-
       <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
           <h3>재고 현황</h3>
@@ -292,7 +289,6 @@
       </div>
     </div>
   </div>
-
   <script>
     // 로컬 스토리지를 사용한 완전한 클라이언트 사이드 시스템
     let currentUser = null;
@@ -342,7 +338,6 @@
         location: 'D-1-3'
       }
     ];
-
     // 로컬 스토리지에서 데이터 로드
     function loadData() {
       const savedInventory = localStorage.getItem('inventory');
@@ -350,221 +345,13 @@
         inventory = JSON.parse(savedInventory);
       }
     }
-
     // 로컬 스토리지에 데이터 저장
     function saveData() {
       localStorage.setItem('inventory', JSON.stringify(inventory));
     }
-
     // 페이지 로드 시 데이터 로드
     loadData();
-
     // 로그인 처리
     document.getElementById('login-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const errorDiv = document.getElementById('login-error');
-      const successDiv = document.getElementById('login-success');
-      
-      // 초기화
-      errorDiv.style.display = 'none';
-      successDiv.style.display = 'none';
-      
-      // 인증 확인
-      const user = users.find(u => u.username === username && u.password === password);
-      
-      if (user) {
-        currentUser = user;
-        successDiv.textContent = '로그인 성공! 잠시만 기다려주세요...';
-        successDiv.style.display = 'block';
-        
-        setTimeout(() => {
-          showDashboard();
-          loadInventory();
-        }, 1000);
-      } else {
-        errorDiv.textContent = '사용자명 또는 비밀번호가 올바르지 않습니다.';
-        errorDiv.style.display = 'block';
-      }
-    });
-
-    // 대시보드 표시
-    function showDashboard() {
-      document.getElementById('login-section').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-      document.getElementById('user-info').style.display = 'block';
-      document.getElementById('username').textContent = currentUser.username;
-    }
-
-    // 로그아웃
-    function logout() {
-      currentUser = null;
-      document.getElementById('login-section').style.display = 'block';
-      document.getElementById('dashboard').style.display = 'none';
-      document.getElementById('user-info').style.display = 'none';
-      document.getElementById('login-form').reset();
-      document.getElementById('login-error').style.display = 'none';
-      document.getElementById('login-success').style.display = 'none';
-    }
-
-    // 재고 데이터 로드 및 표시
-    function loadInventory() {
-      updateStats(inventory);
-      updateInventoryTable(inventory);
-    }
-
-    // 통계 업데이트
-    function updateStats(inventory) {
-      const totalItems = inventory.length;
-      const lowStock = inventory.filter(item => item.quantity <= item.min_quantity && item.quantity > 0).length;
-      const outOfStock = inventory.filter(item => item.quantity === 0).length;
-      const totalQuantity = inventory.reduce((sum, item) => sum + item.quantity, 0);
-      
-      document.getElementById('total-items').textContent = totalItems;
-      document.getElementById('low-stock').textContent = lowStock;
-      document.getElementById('out-of-stock').textContent = outOfStock;
-      document.getElementById('total-quantity').textContent = totalQuantity;
-    }
-
-    // 재고 테이블 업데이트
-    function updateInventoryTable(inventory) {
-      const tbody = document.getElementById('inventory-tbody');
-      
-      if (inventory.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">등록된 재고가 없습니다.</td></tr>';
-        return;
-      }
-      
-      tbody.innerHTML = inventory.map(item => {
-        let statusColor, statusText;
-        if (item.quantity === 0) {
-          statusColor = '#dc3545';
-          statusText = '품절';
-        } else if (item.quantity <= item.min_quantity) {
-          statusColor = '#ffc107';
-          statusText = '부족';
-        } else {
-          statusColor = '#28a745';
-          statusText = '정상';
-        }
-        
-        const canEdit = currentUser && currentUser.role === 'admin';
-        
-        return `
-          <tr>
-            <td>${item.code || '-'}</td>
-            <td>${item.name || '-'}</td>
-            <td>${item.category || '-'}</td>
-            <td>${item.quantity || 0}</td>
-            <td>${item.min_quantity || 0}</td>
-            <td>${item.location || '-'}</td>
-            <td style="color: ${statusColor}; font-weight: bold;">${statusText}</td>
-            <td>
-              ${canEdit ? `
-                <button class="btn-small" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="editItem(${item.id})">수정</button>
-                <button class="btn-small btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="deleteItem(${item.id})">삭제</button>
-              ` : '권한 없음'}
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    // 품목 추가 폼 토글
-    function toggleAddForm() {
-      const form = document.getElementById('add-item-form');
-      if (form.style.display === 'none' || form.style.display === '') {
-        form.style.display = 'block';
-      } else {
-        form.style.display = 'none';
-        // 폼 초기화
-        document.getElementById('new-code').value = '';
-        document.getElementById('new-name').value = '';
-        document.getElementById('new-category').value = '';
-        document.getElementById('new-location').value = '';
-        document.getElementById('new-quantity').value = '';
-        document.getElementById('new-min-quantity').value = '';
-      }
-    }
-
-    // 새 품목 추가
-    function addNewItem() {
-      if (!currentUser || currentUser.role !== 'admin') {
-        alert('관리자 권한이 필요합니다.');
-        return;
-      }
-
-      const code = document.getElementById('new-code').value;
-      const name = document.getElementById('new-name').value;
-      const category = document.getElementById('new-category').value;
-      const location = document.getElementById('new-location').value;
-      const quantity = parseInt(document.getElementById('new-quantity').value) || 0;
-      const minQuantity = parseInt(document.getElementById('new-min-quantity').value) || 0;
-
-      if (!code || !name || !category || !location) {
-        alert('모든 필드를 입력해주세요.');
-        return;
-      }
-
-      // 중복 코드 체크
-      if (inventory.find(item => item.code === code)) {
-        alert('이미 존재하는 품목코드입니다.');
-        return;
-      }
-
-      const newItem = {
-        id: Math.max(...inventory.map(item => item.id)) + 1,
-        code,
-        name,
-        category,
-        quantity,
-        min_quantity: minQuantity,
-        location
-      };
-
-      inventory.push(newItem);
-      saveData();
-      loadInventory();
-      toggleAddForm();
-      alert('품목이 성공적으로 추가되었습니다.');
-    }
-
-    // 품목 삭제
-    function deleteItem(id) {
-      if (!currentUser || currentUser.role !== 'admin') {
-        alert('관리자 권한이 필요합니다.');
-        return;
-      }
-
-      if (confirm('정말로 이 품목을 삭제하시겠습니까?')) {
-        inventory = inventory.filter(item => item.id !== id);
-        saveData();
-        loadInventory();
-        alert('품목이 삭제되었습니다.');
-      }
-    }
-
-    // 품목 수정 (간단한 수량 조정)
-    function editItem(id) {
-      if (!currentUser || currentUser.role !== 'admin') {
-        alert('관리자 권한이 필요합니다.');
-        return;
-      }
-
-      const item = inventory.find(item => item.id === id);
-      if (!item) return;
-
-      const newQuantity = prompt(`"${item.name}"의 새로운 수량을 입력하세요 (현재: ${item.quantity}):`, item.quantity);
-      
-      if (newQuantity !== null && !isNaN(newQuantity) && newQuantity >= 0) {
-        item.quantity = parseInt(newQuantity);
-        saveData();
-        loadInventory();
-        alert('수량이 업데이트되었습니다.');
-      }
-    }
-  </script>
-</body>
-</html>
+      e.preventDe...
+[truncated]
